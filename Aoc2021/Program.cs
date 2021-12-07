@@ -35,7 +35,7 @@ namespace Aoc2021
                 Console.WriteLine($"{day}: {result}");
             }
 
-            Console.WriteLine($"Elapsed Time: {stopwatch.Elapsed.TotalSeconds} seconds");
+            Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalSeconds} seconds");
         }
     }
 }
