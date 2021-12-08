@@ -21,19 +21,19 @@ namespace Aoc2021.Puzzles
                 .Sum(x => ConvertOutputSignalsToValue(x.Output, x.Map));
         }
 
-        private static int ConvertOutputSignalsToValue(string[] output, (int Digit, string Pattern)[] map)
+        private static int ConvertOutputSignalsToValue(string[] output, IList<(int Digit, string Pattern)> map)
         {
             return output.Select(p => GetOutputDigit(map, p))
                 .Select((x, i) => x * (int)Math.Pow(10, 3 - i))
                 .Sum();
         }
 
-        private static int GetOutputDigit((int Digit, string Pattern)[] map, string pattern)
+        private static int GetOutputDigit(IList<(int Digit, string Pattern)> map, string pattern)
         {
             return map.Single(m => m.Pattern.ToArray().ElementsEqual(pattern.ToArray())).Digit;
         }
 
-        private static (int Digit, string Pattern)[] DecipherSignalPatterns(string[] patterns)
+        private static IList<(int Digit, string Pattern)> DecipherSignalPatterns(string[] patterns)
         {
             var map = new List<(int Digit, string Pattern)>
             {
@@ -45,12 +45,12 @@ namespace Aoc2021.Puzzles
 
             map.Add((3, patterns.Single(p => p.Length == 5 && map.Single(x => x.Digit == 7).Pattern.ToCharArray().All(p.Contains))));
             map.Add((9, patterns.Single(p => p.Length == 6 && map.Single(x => x.Digit == 3).Pattern.ToCharArray().All(p.Contains))));
-            map.Add((0, patterns.Single(p => map.None(x => x.Pattern == p) && p.Length == 6 && map.Single(x => x.Digit == 7).Pattern.ToCharArray().All(p.Contains))));
-            map.Add((6, patterns.Single(p => map.None(x => x.Pattern == p) && p.Length == 6)));
+            map.Add((0, patterns.Single(p => p.Length == 6 &&map.None(x => x.Pattern == p) && map.Single(x => x.Digit == 7).Pattern.ToCharArray().All(p.Contains))));
+            map.Add((6, patterns.Single(p => p.Length == 6 && map.None(x => x.Pattern == p))));
             map.Add((5, patterns.Single(p => p.Length == 5 && p.ToCharArray().All(x => map.Single(m => m.Digit == 6).Pattern.ToCharArray().Contains(x)))));
             map.Add((2, patterns.Single(p => map.None(x => x.Pattern == p))));
 
-            return map.ToArray();
+            return map;
         }
 
         private (string[] Input, string[] Output)[] ReadInput()
