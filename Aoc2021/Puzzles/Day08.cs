@@ -45,7 +45,7 @@ namespace Aoc2021.Puzzles
 
             map.Add((3, patterns.Single(p => p.Length == 5 && map.Single(x => x.Digit == 7).Pattern.ToCharArray().All(p.Contains))));
             map.Add((9, patterns.Single(p => p.Length == 6 && map.Single(x => x.Digit == 3).Pattern.ToCharArray().All(p.Contains))));
-            map.Add((0, patterns.Single(p => p.Length == 6 &&map.None(x => x.Pattern == p) && map.Single(x => x.Digit == 7).Pattern.ToCharArray().All(p.Contains))));
+            map.Add((0, patterns.Single(p => p.Length == 6 && map.None(x => x.Pattern == p) && map.Single(x => x.Digit == 7).Pattern.ToCharArray().All(p.Contains))));
             map.Add((6, patterns.Single(p => p.Length == 6 && map.None(x => x.Pattern == p))));
             map.Add((5, patterns.Single(p => p.Length == 5 && p.ToCharArray().All(x => map.Single(m => m.Digit == 6).Pattern.ToCharArray().Contains(x)))));
             map.Add((2, patterns.Single(p => map.None(x => x.Pattern == p))));
