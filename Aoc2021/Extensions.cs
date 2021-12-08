@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Aoc2021
 {
@@ -52,6 +53,15 @@ namespace Aoc2021
 
             return Comparer<T>.Default.Compare(item, start) >= 0
                    && Comparer<T>.Default.Compare(item, end) <= 0;
+        }
+
+        public static bool None<T>(this IEnumerable<T> collection) => !collection.Any();
+
+        public static bool None<T>(this IEnumerable<T> collection, Func<T, bool> predicate) => !collection.Any(predicate);
+
+        public static bool ElementsEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
+        {
+            return first.OrderBy(x => x).SequenceEqual(second.OrderBy(x => x));
         }
 
     }
