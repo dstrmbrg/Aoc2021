@@ -6,35 +6,27 @@ namespace Aoc2021.Puzzles
 {
     internal class Day04 : Puzzle
     {
-        public override object PartOne()
+        public override object PartOne() => CalculateWinningScore(IncreasingDrawnNumbersSequence);
+
+        public override object PartTwo() => CalculateWinningScore(DecreasingDrawnNumbersSequence);
+
+        private int CalculateWinningScore(Func<IList<int>, IEnumerable<IList<int>>> drawnNumbersSequenceFunc)
         {
             var (drawnNumbers, boards) = ReadInput();
-            var (round, board) = GetWinners(boards, drawnNumbers).First();
-            return CalculateScore(drawnNumbers, round, board);
+
+            return drawnNumbersSequenceFunc(drawnNumbers)
+                .Select(numbers => (DrawnNumbers: numbers,
+                    Board: boards.SingleOrDefault(x => IsFirstBingoRound(x, numbers))))
+                .Where(x => x.Board != null)
+                .Select(x => CalculateScore(x.DrawnNumbers, x.Board))
+                .FirstOrDefault();
         }
 
-        public override object PartTwo()
-        {
-            var (drawnNumbers, boards) = ReadInput();
-            var (round, board) = GetWinners(boards, drawnNumbers).Last();
-            return CalculateScore(drawnNumbers, round, board);
-        }
+        private static int CalculateScore(IList<int> drawnNumbers, int[][] board) => drawnNumbers.Last() * board.SelectMany(x => x).Except(drawnNumbers).Sum();
 
-        private static IList<(int Round, int[][] Board)> GetWinners(IList<int[][]> boards, IList<int> drawnNumbers)
-        {
-            return Enumerable.Range(1, drawnNumbers.Count)
-                .Select(drawnNumbersCount => (drawnNumbersCount, board: boards.FirstOrDefault(x => IsFirstBingoRound(x, drawnNumbers.Take(drawnNumbersCount).ToList()))))
-                .Where(x => x.board != null)
-                .OrderByDescending(x => x.drawnNumbersCount)
-                .ToList();
-        }
+        private static IEnumerable<IList<int>> IncreasingDrawnNumbersSequence(IList<int> drawnNumbers) => Enumerable.Range(0, drawnNumbers.Count).Select(i => drawnNumbers.Take(i).ToList());
 
-        private static int CalculateScore(IList<int> drawnNumbers, int round, int[][] board)
-        {
-            var finalDrawnNumbers = drawnNumbers.Take(round).ToList();
-            var sum = board.SelectMany(x => x).Except(finalDrawnNumbers).Sum();
-            return sum * drawnNumbers[round - 1];
-        }
+        private static IEnumerable<IList<int>> DecreasingDrawnNumbersSequence(IList<int> drawnNumbers) => Enumerable.Range(0, drawnNumbers.Count).Select(i => drawnNumbers.SkipLast(i).ToList());
 
         private (IList<int> drawnNumbers, IList<int[][]> boards) ReadInput()
         {
