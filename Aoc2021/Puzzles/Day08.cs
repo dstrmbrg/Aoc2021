@@ -30,7 +30,7 @@ namespace Aoc2021.Puzzles
 
         private static int GetOutputDigit(IDictionary<int, string> map, string pattern)
         {
-            return map.Single(m => m.Value.ToArray().ElementsEqual(pattern.ToArray())).Key;
+            return map.Single(m => m.Value.ElementsEqual(pattern)).Key;
         }
 
         private static IDictionary<int, string> DecipherSignalPatterns(string[] patterns)

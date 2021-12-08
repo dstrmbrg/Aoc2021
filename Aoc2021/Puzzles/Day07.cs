@@ -23,6 +23,11 @@ namespace Aoc2021.Puzzles
                 .Min(position => CalculateFuelCostAtPosition(positions, position, fuelCostFunc));
         }
 
-        private static int CalculateFuelCostAtPosition(int[] positions, int position, Func<int, int> fuelCostFunc) => positions.Select(p => Math.Abs(position - p)).Sum(fuelCostFunc);
+        private static int CalculateFuelCostAtPosition(int[] positions, int position, Func<int, int> fuelCostFunc)
+        {
+            return positions
+                .Select(p => Math.Abs(position - p))
+                .Sum(fuelCostFunc);
+        }
     }
 }
