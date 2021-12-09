@@ -72,11 +72,6 @@ namespace Aoc2021.Puzzles
             }
         }
 
-        private record Location(int X, int Y, int Height)
-        {
-            public readonly int X = X;
-            public readonly int Y = Y;
-            public readonly int Height = Height;
-        }
+        private record Location(int X, int Y, int Height);
     }
 }
