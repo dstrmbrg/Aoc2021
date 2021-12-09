@@ -29,7 +29,7 @@ namespace Aoc2021.Puzzles
             return threeLargestBasins.Aggregate(1, (current, basin) => current * basin);
         }
 
-        private static IList<Location> GetAdjacentPositions(IDictionary<(int X, int Y), int> map, int x, int y)
+        private static IList<Location> GetAdjacentPositions(IDictionary<(int, int), int> map, int x, int y)
         {
             var adjacent = new List<(int X, int Y)>
             {
@@ -45,21 +45,21 @@ namespace Aoc2021.Puzzles
                 .ToList();
         }
 
-        private static IList<Location> GetAdjacentHigherPositions(IDictionary<(int X, int Y), int> map, int x, int y)
+        private static IList<Location> GetAdjacentHigherPositions(IDictionary<(int, int), int> map, int x, int y)
         {
             return GetAdjacentPositions(map, x, y)
                 .Where(a => a.Height != 9 && a.Height > map[(x, y)])
                 .ToList();
         }
 
-        private static int GetBasinSize(IDictionary<(int X, int Y), int> map, int x, int y)
+        private static int GetBasinSize(IDictionary<(int, int), int> map, int x, int y)
         {
             var basin = GetBasin(map, x, y);
 
             return basin.Distinct().Count() + 1;
         }
 
-        private static IList<Location> GetBasin(IDictionary<(int X, int Y), int> map, int x, int y)
+        private static IList<Location> GetBasin(IDictionary<(int, int), int> map, int x, int y)
         {
             var adjacent = GetAdjacentHigherPositions(map, x, y);
             
