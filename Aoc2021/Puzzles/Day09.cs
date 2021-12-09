@@ -20,11 +20,11 @@ namespace Aoc2021.Puzzles
         {
             var map = GetLocations().ToDictionary(p => (p.X, p.Y), p => p.Height);
             var lowest = map.Where(p => GetAdjacentLocations(map, p.Key.X, p.Key.Y).All(a => a.Height > p.Value));
-            var basins = lowest.Select(x => GetBasinSize(map, x.Key.X, x.Key.Y));
+            var basinSizes = lowest.Select(x => GetBasinSize(map, x.Key.X, x.Key.Y));
 
-            var threeLargestBasins = basins.OrderByDescending(x => x)
-                .Take(3)
-                .ToArray();
+            var threeLargestBasins = basinSizes
+                .OrderByDescending(x => x)
+                .Take(3);
 
             return threeLargestBasins.Aggregate(1, (current, basin) => current * basin);
         }
@@ -44,12 +44,7 @@ namespace Aoc2021.Puzzles
                 .Select(a => new Location(a.X, a.Y, map[(a.X, a.Y)]));
         }
 
-        private static int GetBasinSize(IDictionary<(int, int), int> map, int x, int y)
-        {
-            var basin = GetBasin(map, x, y);
-
-            return basin.Distinct().Count() + 1;
-        }
+        private static int GetBasinSize(IDictionary<(int, int), int> map, int x, int y) => GetBasin(map, x, y).Distinct().Count() + 1;
 
         private static IList<Location> GetBasin(IDictionary<(int, int), int> map, int x, int y)
         {
