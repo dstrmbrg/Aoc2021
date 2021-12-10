@@ -29,9 +29,7 @@ namespace Aoc2021.Puzzles
         private static (ChunkStatusEnum ChunkStatusEnum, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(Queue<char> chunk, Stack<char> openings)
         {
             if (chunk.Count == 0)
-            {
                 return openings.Count == 0 ? (ChunkStatusEnum.Valid, null, openings) : (ChunkStatusEnum.Incomplete, null, openings);
-            }
 
             var currentChar = chunk.Dequeue();
 
