@@ -36,15 +36,13 @@ internal class Day09 : Puzzle
 
     private static int GetBasinSize(IDictionary<(int, int), Location> map, int x, int y) => GetBasin(map, x, y).Distinct().Count() + 1;
 
-    private static IList<Location> GetBasin(IDictionary<(int, int), Location> map, int x, int y)
+    private static IEnumerable<Location> GetBasin(IDictionary<(int, int), Location> map, int x, int y)
     {
         var higherAdjacentLocations = GetAdjacentLocations(map, x, y)
             .Where(a => a.Height != 9 && a.Height > map[(x, y)].Height)
-            .ToList();
+            .ToArray();
 
-        return higherAdjacentLocations
-            .Concat(higherAdjacentLocations.SelectMany(a => GetBasin(map, a.X, a.Y)))
-            .ToList();
+        return higherAdjacentLocations.Concat(higherAdjacentLocations.SelectMany(a => GetBasin(map, a.X, a.Y)));
     }
 
     private IEnumerable<Location> GetLocations()
