@@ -19,7 +19,7 @@ namespace Aoc2021.Puzzles
             var scores = GetChunks()
                 .Select(x => ValidateChunk(x, new Stack<char>()))
                 .Where(x => x.Status == ChunkStatusEnum.Incomplete)
-                .Select(x => CalculateScore(x.RemainingCharacters.ToArray()))
+                .Select(x => CalculateScore(x.RemainingCharacters))
                 .OrderBy(x => x)
                 .ToArray();
 
@@ -40,7 +40,7 @@ namespace Aoc2021.Puzzles
             return ValidateChunk(chunk, openings);
         }
 
-        private static long CalculateScore(char[] characters) => characters.Aggregate<char, long>(0, (sum, c) => sum * 5 + GetChunkOperator(c).SecondScore);
+        private static long CalculateScore(IEnumerable<char> characters) => characters.Aggregate<char, long>(0, (sum, c) => sum * 5 + GetChunkOperator(c).SecondScore);
         private static ChunkOperator GetChunkOperator(char? op) => ChunkOperators.Single(x => x.Opening == op || x.Closing == op);
         private static bool IsClosingCharacter(char op) => ChunkOperators.Any(x => x.Closing == op);
 
