@@ -33,12 +33,12 @@ namespace Aoc2021.Puzzles
                 return openings.Count == 0 ? (ChunkStatusEnum.Valid, null, openings) : (ChunkStatusEnum.Incomplete, null, openings);
             }
 
-            var currentCharacter = chunk.Dequeue();
+            var currentChar = chunk.Dequeue();
 
-            if (IsClosingCharacter(currentCharacter))
-                return openings.Pop() == GetChunkOperator(currentCharacter).Opening ? ValidateChunk(chunk, openings) : (ChunkStatusEnum.Corrupted, currentCharacter, openings);
+            if (IsClosingCharacter(currentChar))
+                return openings.Pop() == GetChunkOperator(currentChar).Opening ? ValidateChunk(chunk, openings) : (ChunkStatusEnum.Corrupted, currentChar, openings);
 
-            openings.Push(currentCharacter);
+            openings.Push(currentChar);
             return ValidateChunk(chunk, openings);
         }
 
