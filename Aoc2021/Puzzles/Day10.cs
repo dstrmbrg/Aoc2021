@@ -45,7 +45,7 @@ namespace Aoc2021.Puzzles
             return ValidateChunk(chunk.Skip(1).ToArray(), openings);
         }
 
-        private static long CalculateScore(char[] characters) => characters.Aggregate<char, long>(0, (current, character) => current * 5 + GetChunkOperator(character).SecondScore);
+        private static long CalculateScore(char[] characters) => characters.Aggregate<char, long>(0, (sum, c) => sum * 5 + GetChunkOperator(c).SecondScore);
         private static ChunkOperator GetChunkOperator(char? op) => ChunkOperators.Single(x => x.Opening == op || x.Closing == op);
 
         private static ChunkOperator[] ChunkOperators => new[]
