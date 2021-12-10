@@ -8,52 +8,53 @@ namespace Aoc2021.Puzzles
     {
         public override object PartOne()
         {
-            var chunks = GetChunks();
-
-            var corruptedChunks = chunks
+            return GetChunks()
                 .Select(x => ValidateChunk(x, new Stack<char>()))
-                .Where(x => x.ChunkEnum == ChunkEnum.Corrupted);
-
-            return corruptedChunks.Sum(x => ToPoints(x.FirstInvalidCharacter));
+                .Where(x => x.ChunkEnum == ChunkStatusEnum.Corrupted)
+                .Sum(x => GetChunkOperator(x.FirstInvalidCharacter).FirstScore);
         }
 
         public override object PartTwo()
         {
-            var chunks = GetChunks();
-
-            var incompleteChunks = chunks
+            var scores = GetChunks()
                 .Select(x => ValidateChunk(x, new Stack<char>()))
-                .Where(x => x.ChunkEnum == ChunkEnum.Incomplete);
+                .Where(x => x.ChunkEnum == ChunkStatusEnum.Incomplete)
+                .Select(x => CalculateScore(x.RemainingCharacters.ToArray()))
+                .OrderBy(x => x)
+                .ToArray();
 
-            var scores = incompleteChunks.Select(x => GetScore(x.RemainingCharacters.ToArray())).ToList();
-
-            var middleScore = scores.OrderBy(x => x)
-                .Skip((scores.Count - 1) / 2)
-                .First();
-
-            return middleScore;
+            return scores[(scores.Length - 1) / 2];
         }
 
-        private (ChunkEnum ChunkEnum, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(char[] chunk, Stack<char> buffer)
+        private static (ChunkStatusEnum ChunkEnum, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(char[] chunk, Stack<char> openings)
         {
             if (chunk.Length == 0)
             {
-                return buffer.Count == 0 ? (ChunkEnum.Valid, null, buffer) : (ChunkEnum.Incomplete, null, buffer);
+                return openings.Count == 0 ? (ChunkStatusEnum.Valid, null, openings) : (ChunkStatusEnum.Incomplete, null, openings);
             }
 
-            if (Instructions.Select(x => x.Start).Contains(chunk[0]))
+            if (ChunkOperators.Select(x => x.Opening).Contains(chunk[0]))
             {
-                buffer.Push(chunk[0]);
-                return ValidateChunk(chunk.Skip(1).ToArray(), buffer);
+                openings.Push(chunk[0]);
+                return ValidateChunk(chunk.Skip(1).ToArray(), openings);
             }
 
-            var instruction = Instructions.Single(x => x.End == chunk[0]);
-
-            if (buffer.Peek() != instruction.Start) return (ChunkEnum.Corrupted, chunk[0], buffer);
+            if (openings.Peek() != GetChunkOperator(chunk[0]).Opening) return (ChunkStatusEnum.Corrupted, chunk[0], openings);
             
-            buffer.Pop();
-            return ValidateChunk(chunk.Skip(1).ToArray(), buffer);
+            openings.Pop();
+            return ValidateChunk(chunk.Skip(1).ToArray(), openings);
         }
+
+        private static long CalculateScore(char[] characters) => characters.Aggregate<char, long>(0, (current, character) => current * 5 + GetChunkOperator(character).SecondScore);
+        private static ChunkOperator GetChunkOperator(char? op) => ChunkOperators.Single(x => x.Opening == op || x.Closing == op);
+
+        private static ChunkOperator[] ChunkOperators => new[]
+        {
+            new ChunkOperator('(', ')', 3, 1), 
+            new ChunkOperator('[', ']', 57, 2), 
+            new ChunkOperator('{', '}', 1197, 3), 
+            new ChunkOperator('<', '>', 25137, 4)
+        };
 
         private IList<char[]> GetChunks()
         {
@@ -63,52 +64,9 @@ namespace Aoc2021.Puzzles
                 .ToList();
         }
 
-        private long GetScore(char[] characters)
-        {
-            long score = 0;
+        private record ChunkOperator(char Opening, char Closing, int FirstScore, int SecondScore);
 
-            foreach (var character in characters)
-            {
-                score *= 5;
-                score += ToPoints2(GetEndInstuction(character));
-            }
-
-            return score;
-        }
-
-        private static int ToPoints(char? c) =>
-            c switch
-            {
-                ')' => 3,
-                ']' => 57,
-                '}' => 1197,
-                '>' => 25137,
-                _ => 0
-            };
-
-        private static int ToPoints2(char? c) =>
-            c switch
-            {
-                ')' => 1,
-                ']' => 2,
-                '}' => 3,
-                '>' => 4,
-                _ => 0
-            };
-
-        private char GetEndInstuction(char startInstruction)
-        {
-            return Instructions.Single(x => x.Start == startInstruction).End;
-        }
-
-        private Instruction[] Instructions => new[]
-        {
-            new Instruction('(', ')'), new Instruction('[', ']'), new Instruction('{', '}'), new Instruction('<', '>')
-        };
-
-        private record Instruction(char Start, char End);
-
-        private enum ChunkEnum
+        private enum ChunkStatusEnum
         {
             Valid,
             Incomplete,
