@@ -10,7 +10,7 @@ namespace Aoc2021.Puzzles
         {
             return GetChunks()
                 .Select(x => ValidateChunk(x, new Stack<char>()))
-                .Where(x => x.ChunkStatusEnum == ChunkStatusEnum.Corrupted)
+                .Where(x => x.Status == ChunkStatusEnum.Corrupted)
                 .Sum(x => GetChunkOperator(x.FirstInvalidCharacter).FirstScore);
         }
 
@@ -18,7 +18,7 @@ namespace Aoc2021.Puzzles
         {
             var scores = GetChunks()
                 .Select(x => ValidateChunk(x, new Stack<char>()))
-                .Where(x => x.ChunkStatusEnum == ChunkStatusEnum.Incomplete)
+                .Where(x => x.Status == ChunkStatusEnum.Incomplete)
                 .Select(x => CalculateScore(x.RemainingCharacters.ToArray()))
                 .OrderBy(x => x)
                 .ToArray();
@@ -26,7 +26,7 @@ namespace Aoc2021.Puzzles
             return scores[(scores.Length - 1) / 2];
         }
 
-        private static (ChunkStatusEnum ChunkStatusEnum, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(Queue<char> chunk, Stack<char> openings)
+        private static (ChunkStatusEnum Status, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(Queue<char> chunk, Stack<char> openings)
         {
             if (chunk.Count == 0)
                 return openings.Count == 0 ? (ChunkStatusEnum.Valid, null, openings) : (ChunkStatusEnum.Incomplete, null, openings);
