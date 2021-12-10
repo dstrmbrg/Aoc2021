@@ -26,27 +26,25 @@ namespace Aoc2021.Puzzles
             return scores[(scores.Length - 1) / 2];
         }
 
-        private static (ChunkStatusEnum ChunkStatusEnum, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(char[] chunk, Stack<char> openings)
+        private static (ChunkStatusEnum ChunkStatusEnum, char? FirstInvalidCharacter, Stack<char> RemainingCharacters) ValidateChunk(Queue<char> chunk, Stack<char> openings)
         {
-            if (chunk.Length == 0)
+            if (chunk.Count == 0)
             {
                 return openings.Count == 0 ? (ChunkStatusEnum.Valid, null, openings) : (ChunkStatusEnum.Incomplete, null, openings);
             }
 
-            if (ChunkOperators.Select(x => x.Opening).Contains(chunk[0]))
-            {
-                openings.Push(chunk[0]);
-                return ValidateChunk(chunk.Skip(1).ToArray(), openings);
-            }
+            var currentCharacter = chunk.Dequeue();
 
-            if (openings.Peek() != GetChunkOperator(chunk[0]).Opening) return (ChunkStatusEnum.Corrupted, chunk[0], openings);
-            
-            openings.Pop();
-            return ValidateChunk(chunk.Skip(1).ToArray(), openings);
+            if (IsClosingCharacter(currentCharacter))
+                return openings.Pop() == GetChunkOperator(currentCharacter).Opening ? ValidateChunk(chunk, openings) : (ChunkStatusEnum.Corrupted, currentCharacter, openings);
+
+            openings.Push(currentCharacter);
+            return ValidateChunk(chunk, openings);
         }
 
         private static long CalculateScore(char[] characters) => characters.Aggregate<char, long>(0, (sum, c) => sum * 5 + GetChunkOperator(c).SecondScore);
         private static ChunkOperator GetChunkOperator(char? op) => ChunkOperators.Single(x => x.Opening == op || x.Closing == op);
+        private static bool IsClosingCharacter(char op) => ChunkOperators.Any(x => x.Closing == op);
 
         private static ChunkOperator[] ChunkOperators => new[]
         {
@@ -56,11 +54,11 @@ namespace Aoc2021.Puzzles
             new ChunkOperator('<', '>', 25137, 4)
         };
 
-        private IList<char[]> GetChunks()
+        private IList<Queue<char>> GetChunks()
         {
             return Utilities.GetInput(GetType())
                 .Split(Environment.NewLine)
-                .Select(x => x.ToCharArray())
+                .Select(x => new Queue<char>(x.ToCharArray()))
                 .ToList();
         }
 
