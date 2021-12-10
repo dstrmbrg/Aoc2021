@@ -1,15 +1,14 @@
-﻿namespace Aoc2021.Puzzles
-{
-    internal class Day12 : DisabledPuzzle
-    {
-        public override object PartOne()
-        {
-            return "-1";
-        }
+﻿namespace Aoc2021.Puzzles;
 
-        public override object PartTwo()
-        {
-            return "-1";
-        }
+internal class Day12 : DisabledPuzzle
+{
+    public override object PartOne()
+    {
+        return "-1";
+    }
+
+    public override object PartTwo()
+    {
+        return "-1";
     }
 }

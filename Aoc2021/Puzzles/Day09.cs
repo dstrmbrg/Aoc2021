@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Aoc2021.Puzzles;
+
 internal class Day09 : Puzzle
 {
     private static int _xMax;
