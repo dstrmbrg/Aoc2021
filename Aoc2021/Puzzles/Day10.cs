@@ -52,12 +52,11 @@ internal class Day10 : Puzzle
         new ChunkOperator('<', '>', 25137, 4)
     };
 
-    private IList<Queue<char>> GetChunks()
+    private IEnumerable<Queue<char>> GetChunks()
     {
         return Utilities.GetInput(GetType())
             .Split(Environment.NewLine)
-            .Select(x => new Queue<char>(x.ToCharArray()))
-            .ToList();
+            .Select(x => new Queue<char>(x.ToCharArray()));
     }
 
     private record ChunkOperator(char Opening, char Closing, int FirstScore, int SecondScore);
