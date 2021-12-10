@@ -28,7 +28,7 @@ namespace Aoc2021.Puzzles
             var scores = incompleteChunks.Select(x => GetScore(x.RemainingCharacters.ToArray())).ToList();
 
             var middleScore = scores.OrderBy(x => x)
-                .Skip(scores.Count / 2)
+                .Skip((scores.Count - 1) / 2)
                 .First();
 
             return middleScore;
@@ -63,9 +63,9 @@ namespace Aoc2021.Puzzles
                 .ToList();
         }
 
-        private int GetScore(char[] characters)
+        private long GetScore(char[] characters)
         {
-            var score = 0;
+            long score = 0;
 
             foreach (var character in characters)
             {
