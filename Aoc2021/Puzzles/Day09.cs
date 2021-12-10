@@ -11,21 +11,20 @@ internal class Day09 : Puzzle
     public override object PartOne()
     {
         var map = GetLocations().ToDictionary(p => (p.X, p.Y));
-        var lowest = map.Where(p => GetAdjacentLocations(map, p.Key.X, p.Key.Y).All(a => a.Height > p.Value.Height));
-        return lowest.Sum(p => p.Value.Height + 1);
+        
+        return map.Where(p => GetAdjacentLocations(map, p.Key.X, p.Key.Y).All(a => a.Height > p.Value.Height))
+            .Sum(p => p.Value.Height + 1);
     }
 
     public override object PartTwo()
     {
         var map = GetLocations().ToDictionary(p => (p.X, p.Y));
-        var lowest = map.Where(p => GetAdjacentLocations(map, p.Key.X, p.Key.Y).All(a => a.Height > p.Value.Height));
-        var basinSizes = lowest.Select(x => GetBasinSize(map, x.Key.X, x.Key.Y));
-
-        var threeLargestBasins = basinSizes
+        
+        return map.Where(p => GetAdjacentLocations(map, p.Key.X, p.Key.Y).All(a => a.Height > p.Value.Height))
+            .Select(x => GetBasinSize(map, x.Key.X, x.Key.Y))
             .OrderByDescending(x => x)
-            .Take(3);
-
-        return threeLargestBasins.Aggregate(1, (current, basin) => current * basin);
+            .Take(3)
+            .Aggregate(1, (current, basin) => current * basin);
     }
 
     private static IEnumerable<Location> GetAdjacentLocations(IDictionary<(int, int), Location> map, int x, int y)
