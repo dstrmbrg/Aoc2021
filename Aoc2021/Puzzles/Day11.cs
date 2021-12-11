@@ -58,10 +58,8 @@ internal class Day11 : Puzzle
     {
         for (var xOffset = -1; xOffset <= 1; xOffset++)
         for (var yOffset = -1; yOffset <= 1; yOffset++)
-        {
             if ((octopus.X + xOffset).IsBetween(0, 9) && (octopus.Y + yOffset).IsBetween(0, 9))
                 yield return map[(octopus.X + xOffset, octopus.Y + yOffset)];
-        }
     }
 
     private static void IncreaseEnergyLevel(Octopus octopus) => octopus.EnergyLevel = (octopus.EnergyLevel + 1) % 10;
