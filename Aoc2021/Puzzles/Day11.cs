@@ -33,25 +33,25 @@ internal class Day11 : Puzzle
 
     private static int SimulateFlashing(IDictionary<(int X, int Y), Octopus> map, Octopus[] flashingOctopuses)
     {
-        var newFleshingOctopuses = map
+        var newFlashingOctopuses = map
             .Where(x => x.Value.EnergyLevel == 0)
             .Where(x => !flashingOctopuses.Contains(x.Value))
             .Select(x => x.Value)
             .ToArray();
 
-        if (newFleshingOctopuses.Length == 0) return 0;
+        if (newFlashingOctopuses.Length == 0) return 0;
         
-        newFleshingOctopuses
+        newFlashingOctopuses
             .SelectMany(o => GetAdjacentOctopuses(map, o))
             .Where(x => x.EnergyLevel != 0)
             .ForEach(IncreaseEnergyLevel);
 
         flashingOctopuses = flashingOctopuses
-            .Concat(newFleshingOctopuses)
+            .Concat(newFlashingOctopuses)
             .Distinct()
             .ToArray();
 
-        return newFleshingOctopuses.Length + SimulateFlashing(map, flashingOctopuses);
+        return newFlashingOctopuses.Length + SimulateFlashing(map, flashingOctopuses);
     }
 
     private static IEnumerable<Octopus> GetAdjacentOctopuses(IDictionary<(int, int), Octopus> map, Octopus octopus)
