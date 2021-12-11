@@ -20,12 +20,8 @@ internal class Day11 : Puzzle
     private static (int FlashingCount, int SynchronizedAtStep) SimulateOctopusStep(IDictionary<(int X, int Y), Octopus> map, int steps, int currentStep = 0)
     {
         if (currentStep == steps) return (0, 0);
+        if (steps == -1 && map.All(x => x.Value.EnergyLevel == 0)) return (0, currentStep);
 
-        if (steps == -1 && map.All(x => x.Value.EnergyLevel == 0))
-        {
-            return (0, currentStep);
-        }
-        
         map
             .Select(x => x.Value)
             .ForEach(IncreaseEnergyLevel);
