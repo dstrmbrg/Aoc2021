@@ -42,7 +42,7 @@ internal class Day11 : Puzzle
         if (newFleshingOctopuses.Length == 0) return 0;
         
         newFleshingOctopuses
-            .SelectMany(o => GetAdjacentOctopuses(map, o.X, o.Y))
+            .SelectMany(o => GetAdjacentOctopuses(map, o))
             .Where(x => x.EnergyLevel != 0)
             .ForEach(IncreaseEnergyLevel);
 
@@ -54,13 +54,13 @@ internal class Day11 : Puzzle
         return newFleshingOctopuses.Length + SimulateFlashing(map, flashingOctopuses);
     }
 
-    private static IEnumerable<Octopus> GetAdjacentOctopuses(IDictionary<(int, int), Octopus> map, int x, int y)
+    private static IEnumerable<Octopus> GetAdjacentOctopuses(IDictionary<(int, int), Octopus> map, Octopus octopus)
     {
         for (var xOffset = -1; xOffset <= 1; xOffset++)
         for (var yOffset = -1; yOffset <= 1; yOffset++)
         {
-            if ((x + xOffset).IsBetween(0, 9) && (y + yOffset).IsBetween(0, 9))
-                yield return map[(x+ xOffset, y + yOffset)];
+            if ((octopus.X + xOffset).IsBetween(0, 9) && (octopus.Y + yOffset).IsBetween(0, 9))
+                yield return map[(octopus.X + xOffset, octopus.Y + yOffset)];
         }
     }
 
