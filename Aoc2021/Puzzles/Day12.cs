@@ -24,18 +24,18 @@ internal class Day12 : Puzzle
 
         if (validNodes.Length == 0) return 0;
 
-        visitedLimitedNodes = CopyAndAppendArray(visitedLimitedNodes, node);
+        if (node.IsLimited)
+            visitedLimitedNodes = CopyAndAppendArray(visitedLimitedNodes, node);
+
         return validNodes.Sum(x => GetPathCount(visitedLimitedNodes, x, limitToExactlyOnce));
     }
 
     private static Node[] CopyAndAppendArray(Node[] source, Node node)
     {
-        var length = node.IsLimited ? source.Length + 1 : source.Length;
-        var destination = new Node[length];
+        var destination = new Node[source.Length + 1];
         Array.Copy(source, destination, source.Length);
+        destination[^1] = node;
 
-        if (node.IsLimited)
-            destination[^1] = node;
         return destination;
     }
 
