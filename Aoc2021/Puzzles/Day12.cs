@@ -21,7 +21,8 @@ internal class Day12 : Puzzle
             visitedLimitedNodes = new HashSet<Node>(visitedLimitedNodes, visitedLimitedNodes.Comparer) { node };
 
         return node.ConnectedNodes
-            .Where(x => !x.IsStart && (!x.LimitedVisits || allowVisitOneLimitedNodeTwice || !visitedLimitedNodes.Contains(x)))
+            .Where(x => !x.IsStart && 
+                        (!x.LimitedVisits || allowVisitOneLimitedNodeTwice || !visitedLimitedNodes.Contains(x)))
             .Sum(x => GetPathCount(visitedLimitedNodes, x, allowVisitOneLimitedNodeTwice));
     }
 
