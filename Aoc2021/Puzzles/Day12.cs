@@ -10,22 +10,22 @@ internal class Day12 : Puzzle
     {
         var start = GetStartNode();
 
-        return GetPaths(new List<Node>(), start, true).Count;
+        return GetPathCount(new List<Node>(), start, true);
     }
 
     public override object PartTwo()
     {
         var start = GetStartNode();
 
-        return GetPaths(new List<Node>(), start, false).Count;
+        return GetPathCount(new List<Node>(), start, false);
     }
 
-    private static IList<IList<Node>> GetPaths(IList<Node> path, Node node, bool limitToExactlyOnce)
+    private static int GetPathCount(IList<Node> path, Node node, bool limitToExactlyOnce)
     {
         path.Add(node);
 
         if (node.Name == "end")
-            return new List<IList<Node>> { path };
+            return 1;
 
         var validNodes = node.ConnectedNodes
             .Where(x => x.Name != "start")
@@ -34,7 +34,7 @@ internal class Day12 : Puzzle
                 !limitToExactlyOnce && !path.GroupBy(y => y).Any(z => z.Key.IsLimited && z.Count() == 2))
             .ToList();
         
-        return validNodes.None() ? new List<IList<Node>>() : validNodes.Aggregate(new List<IList<Node>>(), (current, validNode) => current.Concat(GetPaths(path.ToList(), validNode, limitToExactlyOnce)).ToList());
+        return validNodes.None() ? 0 : validNodes.Sum(x => GetPathCount(path.ToList(), x, limitToExactlyOnce));
     }
 
     private Node GetStartNode()
