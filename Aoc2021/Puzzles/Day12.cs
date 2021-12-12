@@ -34,12 +34,7 @@ internal class Day12 : Puzzle
                 !limitToExactlyOnce && !path.GroupBy(y => y).Any(z => z.Key.IsLimited && z.Count() == 2))
             .ToList();
         
-        if (validNodes.None())
-            return new List<IList<Node>>();
-
-        var result = new List<IList<Node>>();
-
-        return validNodes.Aggregate(result, (current, validNode) => current.Concat(GetPaths(path.ToList(), validNode, limitToExactlyOnce)).ToList());
+        return validNodes.None() ? new List<IList<Node>>() : validNodes.Aggregate(new List<IList<Node>>(), (current, validNode) => current.Concat(GetPaths(path.ToList(), validNode, limitToExactlyOnce)).ToList());
     }
 
     private Node GetStartNode()
