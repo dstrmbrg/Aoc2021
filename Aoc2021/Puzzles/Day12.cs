@@ -6,72 +6,79 @@ namespace Aoc2021.Puzzles;
 
 internal class Day12 : Puzzle
 {
-    public override object PartOne()
+    public override object PartOne() => GetPathCount(Array.Empty<Node>(), GetStartNode(), true);
+
+    public override object PartTwo() => GetPathCount(Array.Empty<Node>(), GetStartNode(), false);
+
+    private static int GetPathCount(Node[] visitedLimitedNodes, Node node, bool limitToExactlyOnce)
     {
-        var start = GetStartNode();
+        if (node.IsEnd) return 1;
 
-        return GetPathCount(new List<Node>(), start, true);
-    }
-
-    public override object PartTwo()
-    {
-        var start = GetStartNode();
-
-        return GetPathCount(new List<Node>(), start, false);
-    }
-
-    private static int GetPathCount(IList<Node> path, Node node, bool limitToExactlyOnce)
-    {
-        if (node.Name == "end")
-            return 1;
-
-        if (!limitToExactlyOnce && node.IsLimited && path.Contains(node))
+        if (!limitToExactlyOnce && node.IsLimited && visitedLimitedNodes.Contains(node))
             limitToExactlyOnce = true;
 
-        path.Add(node);
-
         var validNodes = node.ConnectedNodes
-            .Where(x => x.Name != "start")
-            .Where(x => !x.IsLimited || !limitToExactlyOnce || !path.Contains(x))
-            .ToList();
-        
-        return validNodes.None() ? 0 : validNodes.Sum(x => GetPathCount(path.ToList(), x, limitToExactlyOnce));
+            .Where(x => !x.IsStart)
+            .Where(x => !x.IsLimited || !limitToExactlyOnce || !visitedLimitedNodes.Contains(x))
+            .ToArray();
+
+        if (validNodes.Length == 0) return 0;
+
+        visitedLimitedNodes = CopyAndAppendArray(visitedLimitedNodes, node);
+        return validNodes.Sum(x => GetPathCount(visitedLimitedNodes, x, limitToExactlyOnce));
+    }
+
+    private static Node[] CopyAndAppendArray(Node[] source, Node node)
+    {
+        var length = node.IsLimited ? source.Length + 1 : source.Length;
+        var destination = new Node[length];
+        Array.Copy(source, destination, source.Length);
+
+        if (node.IsLimited)
+            destination[^1] = node;
+        return destination;
     }
 
     private Node GetStartNode()
     {
-        var lines = Utilities.GetInput(GetType())
-            .Split(Environment.NewLine);
+        var paths = Utilities.GetInput(GetType())
+            .Split(Environment.NewLine)
+            .Select(x => x.Split("-").ToArray())
+            .Select(x => (Start: x[0], Destination: x[1]));
 
-        var nodes = lines
-            .SelectMany(x => x.Split("-"))
-            .Distinct()
-            .Select(x => new Node(x))
-            .ToList();
+        var nodesDict = new Dictionary<string, Node>();
 
-        foreach (var line in lines)
+        foreach (var (start, destination) in paths)
         {
-            var split = line.Split("-");
-            var (first, second) = (nodes.Single(n => n.Name == split[0]), nodes.Single(n => n.Name == split[1]));
+            if (!nodesDict.ContainsKey(start))
+                nodesDict.Add(start, new Node(start));
 
-            first.ConnectedNodes.Add(second);
-            second.ConnectedNodes.Add(first);
+            if (!nodesDict.ContainsKey(destination))
+                nodesDict.Add(destination, new Node(destination));
+
+            var (startNode, destinationNode) = (nodesDict[start], nodesDict[destination]);
+
+            startNode.ConnectedNodes.Add(destinationNode);
+            destinationNode.ConnectedNodes.Add(startNode);
         }
 
-        return nodes.Single(x => x.Name == "start");
+        return nodesDict["start"];
     }
 
     private class Node
     {
+        public readonly bool IsEnd;
+        public readonly bool IsLimited;
+        public readonly bool IsStart;
+
         public Node(string name)
         {
-            Name = name;
             ConnectedNodes = new List<Node>();
+            IsStart = name == "start";
+            IsEnd = name == "end";
+            IsLimited = name == name.ToLower();
         }
 
-        public string Name { get; set; }
         public IList<Node> ConnectedNodes { get; }
-
-        public bool IsLimited => Name == Name.ToLower();
     }
 }
