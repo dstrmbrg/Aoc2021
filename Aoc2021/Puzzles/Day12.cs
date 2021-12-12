@@ -50,8 +50,8 @@ internal class Day12 : Puzzle
 
     private class Node
     {
-        public readonly bool IsEnd;
         public readonly bool IsStart;
+        public readonly bool IsEnd;
         public readonly bool LimitedVisits;
 
         public Node(string name)
