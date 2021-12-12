@@ -22,14 +22,14 @@ internal class Day12 : Puzzle
 
     private static int GetPathCount(IList<Node> path, Node node, bool limitToExactlyOnce)
     {
+        if (node.Name == "end")
+            return 1;
+
         if (!limitToExactlyOnce && node.IsLimited && path.Contains(node))
             limitToExactlyOnce = true;
 
         path.Add(node);
 
-        if (node.Name == "end")
-            return 1;
-        
         var validNodes = node.ConnectedNodes
             .Where(x => x.Name != "start")
             .Where(x => !x.IsLimited || !limitToExactlyOnce || !path.Contains(x))
