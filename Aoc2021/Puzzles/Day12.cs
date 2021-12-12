@@ -10,31 +10,32 @@ internal class Day12 : Puzzle
     {
         var start = GetStartNode();
 
-        return GetPathCount(new List<Node>(), start, true);
+        return GetPathCount(new HashSet<Node>(), start, true);
     }
 
     public override object PartTwo()
     {
         var start = GetStartNode();
 
-        return GetPathCount(new List<Node>(), start, false);
+        return GetPathCount(new HashSet<Node>(), start, false);
     }
 
-    private static int GetPathCount(IList<Node> path, Node node, bool limitToExactlyOnce)
+    private static int GetPathCount(ISet<Node> path, Node node, bool limitToExactlyOnce)
     {
+        if (!limitToExactlyOnce && node.IsLimited && path.Contains(node))
+            limitToExactlyOnce = true;
+
         path.Add(node);
 
         if (node.Name == "end")
             return 1;
-
+        
         var validNodes = node.ConnectedNodes
             .Where(x => x.Name != "start")
-            .Where(x =>
-                !x.IsLimited || !path.Contains(x) ||
-                !limitToExactlyOnce && path.Where(y => y.IsLimited).GroupBy(y => y).All(z => z.Count() < 2))
+            .Where(x => !x.IsLimited || !limitToExactlyOnce || !path.Contains(x))
             .ToList();
         
-        return validNodes.None() ? 0 : validNodes.Sum(x => GetPathCount(path.ToList(), x, limitToExactlyOnce));
+        return validNodes.None() ? 0 : validNodes.Sum(x => GetPathCount(path.ToHashSet(), x, limitToExactlyOnce));
     }
 
     private Node GetStartNode()
