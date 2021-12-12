@@ -31,7 +31,7 @@ internal class Day12 : Puzzle
             .Where(x => x.Name != "start")
             .Where(x =>
                 !x.IsLimited || !path.Contains(x) ||
-                !limitToExactlyOnce && !path.GroupBy(y => y).Any(z => z.Key.IsLimited && z.Count() == 2))
+                !limitToExactlyOnce && path.Where(y => y.IsLimited).GroupBy(y => y).All(z => z.Count() < 2))
             .ToList();
         
         return validNodes.None() ? 0 : validNodes.Sum(x => GetPathCount(path.ToList(), x, limitToExactlyOnce));
