@@ -6,28 +6,23 @@ namespace Aoc2021.Puzzles;
 
 internal class Day12 : Puzzle
 {
-    public override object PartOne() => GetPathCount(Array.Empty<Node>(), GetStartNode(), true);
+    public override object PartOne() => GetPathCount(Array.Empty<Node>(), GetStartNode(), false);
 
-    public override object PartTwo() => GetPathCount(Array.Empty<Node>(), GetStartNode(), false);
+    public override object PartTwo() => GetPathCount(Array.Empty<Node>(), GetStartNode(), true);
 
-    private static int GetPathCount(Node[] visitedLimitedNodes, Node node, bool limitToExactlyOnce)
+    private static int GetPathCount(Node[] visitedLimitedNodes, Node node, bool allowVisitOneLimitedNodeTwice)
     {
         if (node.IsEnd) return 1;
 
-        if (!limitToExactlyOnce && node.IsLimited && visitedLimitedNodes.Contains(node))
-            limitToExactlyOnce = true;
+        if (allowVisitOneLimitedNodeTwice && node.LimitedVisits && visitedLimitedNodes.Contains(node))
+            allowVisitOneLimitedNodeTwice = false;
 
-        var validNodes = node.ConnectedNodes
-            .Where(x => !x.IsStart)
-            .Where(x => !x.IsLimited || !limitToExactlyOnce || !visitedLimitedNodes.Contains(x))
-            .ToArray();
-
-        if (validNodes.Length == 0) return 0;
-
-        if (node.IsLimited)
+        if (node.LimitedVisits)
             visitedLimitedNodes = CopyAndAppendArray(visitedLimitedNodes, node);
 
-        return validNodes.Sum(x => GetPathCount(visitedLimitedNodes, x, limitToExactlyOnce));
+        return node.ConnectedNodes
+            .Where(x => !x.IsStart && (!x.LimitedVisits || allowVisitOneLimitedNodeTwice || !visitedLimitedNodes.Contains(x)))
+            .Sum(x => GetPathCount(visitedLimitedNodes, x, allowVisitOneLimitedNodeTwice));
     }
 
     private static Node[] CopyAndAppendArray(Node[] source, Node node)
@@ -50,11 +45,8 @@ internal class Day12 : Puzzle
 
         foreach (var (start, destination) in paths)
         {
-            if (!nodesDict.ContainsKey(start))
-                nodesDict.Add(start, new Node(start));
-
-            if (!nodesDict.ContainsKey(destination))
-                nodesDict.Add(destination, new Node(destination));
+            nodesDict.TryAdd(start, new Node(start));
+            nodesDict.TryAdd(destination, new Node(destination));
 
             var (startNode, destinationNode) = (nodesDict[start], nodesDict[destination]);
 
@@ -68,15 +60,15 @@ internal class Day12 : Puzzle
     private class Node
     {
         public readonly bool IsEnd;
-        public readonly bool IsLimited;
         public readonly bool IsStart;
+        public readonly bool LimitedVisits;
 
         public Node(string name)
         {
             ConnectedNodes = new List<Node>();
             IsStart = name == "start";
             IsEnd = name == "end";
-            IsLimited = name == name.ToLower();
+            LimitedVisits = name == name.ToLower();
         }
 
         public IList<Node> ConnectedNodes { get; }

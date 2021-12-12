@@ -35,6 +35,6 @@ internal static class Program
             Console.WriteLine($"{day}: {result}");
         }
 
-        Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalSeconds} seconds");
+        Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalMilliseconds} ms");
     }
 }
