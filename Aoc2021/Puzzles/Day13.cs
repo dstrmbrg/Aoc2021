@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Aoc2021.Puzzles;
 
@@ -56,17 +57,17 @@ internal class Day13 : Puzzle
         var xMax = dots.Max(d => d.X);
         var yMax = dots.Max(d => d.Y);
         var dotsDict = dots.ToDictionary(d => (d.X, d.Y));
-        var result = Environment.NewLine;
+        var sb = new StringBuilder(Environment.NewLine);
 
         for (var y = 0; y <= yMax; y++)
         {
             for (var x = 0; x <= xMax; x++) 
-                result += dotsDict.ContainsKey((x, y)) ? "#" : ".";
+                sb.Append(dotsDict.ContainsKey((x, y)) ? "#" : ".");
 
-            result += Environment.NewLine;
+            sb.Append(Environment.NewLine);
         }
 
-        return result;
+        return sb.ToString();
     }
 
     private (IList<Dot> Dots, IList<(char Axis, int Coordinate)> Folds) ReadInput()
