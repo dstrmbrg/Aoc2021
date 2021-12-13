@@ -10,33 +10,43 @@ internal class Day13 : Puzzle
     {
         var (dots, folds) = ReadInput();
 
-        return Fold(dots, folds.Take(1)).Count;
+        return FoldDots(dots, folds.Take(1)).Count;
     }
 
     public override object PartTwo()
     {
         var (dots, folds) = ReadInput();
-        var result = Fold(dots, folds);
+        var result = FoldDots(dots, folds);
 
         return ToPrintableString(result);
     }
 
-    private static IList<Dot> Fold(IList<Dot> dots, IEnumerable<(char Axis, int Coordinate)> folds)
+    private static IList<Dot> FoldDots(IEnumerable<Dot> dots, IEnumerable<(char Axis, int Coordinate)> folds)
+    {
+        return dots.Select(dot => FoldDot(dot, folds))
+            .DistinctBy(d => (d.X, d.Y))
+            .ToList();
+    }
+
+    private static Dot FoldDot(Dot dot, IEnumerable<(char Axis, int Coordinate)> folds)
     {
         foreach (var (axis, coordinate) in folds)
         {
-            var dotsToReflect = axis == 'x'
-                ? dots.Where(d => d.X > coordinate).ToList()
-                : dots.Where(d => d.Y > coordinate).ToList();
-
-            foreach (var dotToReflect in dotsToReflect)
-                if (axis == 'x')
-                    dotToReflect.X = Reflect(dotToReflect.X, coordinate);
-                else
-                    dotToReflect.Y = Reflect(dotToReflect.Y, coordinate);
+            switch (axis)
+            {
+                case 'x' when dot.X < coordinate:
+                case 'y' when dot.Y < coordinate:
+                    continue;
+                case 'x':
+                    dot.X = Reflect(dot.X, coordinate);
+                    break;
+                default:
+                    dot.Y = Reflect(dot.Y, coordinate);
+                    break;
+            }
         }
 
-        return dots.DistinctBy(d => (d.X, d.Y)).ToList();
+        return dot;
     }
 
     private static int Reflect(int position, int reflectAt) => 2 * reflectAt - position;
@@ -87,5 +97,4 @@ internal class Day13 : Puzzle
         public int X;
         public int Y;
     }
-
 }
