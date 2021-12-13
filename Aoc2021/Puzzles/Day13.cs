@@ -50,13 +50,12 @@ internal class Day13 : Puzzle
     {
         var xMax = dots.Max(d => d.X);
         var yMax = dots.Max(d => d.Y);
-        var dotsDict = dots.ToDictionary(d => (d.X, d.Y));
         var sb = new StringBuilder(Environment.NewLine);
 
         for (var y = 0; y <= yMax; y++)
         {
             for (var x = 0; x <= xMax; x++) 
-                sb.Append(dotsDict.ContainsKey((x, y)) ? "#" : ".");
+                sb.Append(dots.Any(d => d.X == x && d.Y == y) ? "#" : ".");
 
             sb.Append(Environment.NewLine);
         }
