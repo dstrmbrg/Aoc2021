@@ -2,25 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WinstonPuckett.PipeExtensions;
 
 namespace Aoc2021.Puzzles;
 
 internal class Day13 : Puzzle
 {
-    public override object PartOne()
-    {
-        var (dots, folds) = ReadInput();
+    public override object PartOne() => ReadInput()
+            .Pipe(x => FoldDots(x.Dots, x.Folds.Take(1)))
+            .Count;
 
-        return FoldDots(dots, folds.Take(1)).Count;
-    }
-
-    public override object PartTwo()
-    {
-        var (dots, folds) = ReadInput();
-        var result = FoldDots(dots, folds);
-
-        return ToPrintableString(result);
-    }
+    public override object PartTwo() => ReadInput()
+            .Pipe(FoldDots)
+            .Pipe(ToPrintableString);
 
     private static IList<Dot> FoldDots(IEnumerable<Dot> dots, IEnumerable<(char Axis, int Coordinate)> folds)
     {
@@ -41,7 +35,7 @@ internal class Day13 : Puzzle
                 case 'x':
                     dot.X = Reflect(dot.X, coordinate);
                     break;
-                default:
+                case 'y':
                     dot.Y = Reflect(dot.Y, coordinate);
                     break;
             }
