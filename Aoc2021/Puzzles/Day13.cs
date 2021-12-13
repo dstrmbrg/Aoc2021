@@ -55,7 +55,7 @@ internal class Day13 : Puzzle
         for (var y = 0; y <= yMax; y++)
         {
             for (var x = 0; x <= xMax; x++) 
-                sb.Append(dots.Any(d => d.X == x && d.Y == y) ? "#" : ".");
+                sb.Append(dots.Any(d => d.X == x && d.Y == y) ? "#" : " ");
 
             sb.Append(Environment.NewLine);
         }
