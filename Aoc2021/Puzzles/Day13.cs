@@ -10,19 +10,18 @@ internal class Day13 : Puzzle
     {
         var (dots, folds) = ReadInput();
 
-        return Fold(dots, folds.Take(1).ToList()).Count;
+        return Fold(dots, folds.Take(1)).Count;
     }
 
     public override object PartTwo()
     {
         var (dots, folds) = ReadInput();
-
         var result = Fold(dots, folds);
 
-        return GetDotsPrintableString(result);
+        return ToPrintableString(result);
     }
 
-    private static IList<Dot> Fold(IList<Dot> dots, IList<(char Axis, int Coordinate)> folds)
+    private static IList<Dot> Fold(IList<Dot> dots, IEnumerable<(char Axis, int Coordinate)> folds)
     {
         foreach (var (axis, coordinate) in folds)
         {
@@ -31,16 +30,10 @@ internal class Day13 : Puzzle
                 : dots.Where(d => d.Y > coordinate).ToList();
 
             foreach (var dotToReflect in dotsToReflect)
-            {
                 if (axis == 'x')
-                {
                     dotToReflect.X = Reflect(dotToReflect.X, coordinate);
-                }
                 else
-                {
                     dotToReflect.Y = Reflect(dotToReflect.Y, coordinate);
-                }
-            }
         }
 
         return dots.DistinctBy(d => (d.X, d.Y)).ToList();
@@ -48,21 +41,17 @@ internal class Day13 : Puzzle
 
     private static int Reflect(int position, int reflectAt) => 2 * reflectAt - position;
 
-    private static string GetDotsPrintableString(IList<Dot> dots)
+    private static string ToPrintableString(IList<Dot> dots)
     {
         var xMax = dots.Max(d => d.X);
         var yMax = dots.Max(d => d.Y);
-
         var dotsDict = dots.ToDictionary(d => (d.X, d.Y));
-
         var result = Environment.NewLine;
 
         for (var y = 0; y <= yMax; y++)
         {
-            for (var x = 0; x <= xMax; x++)
-            {
+            for (var x = 0; x <= xMax; x++) 
                 result += dotsDict.ContainsKey((x, y)) ? "#" : ".";
-            }
 
             result += Environment.NewLine;
         }
@@ -77,7 +66,7 @@ internal class Day13 : Puzzle
         var dots = split[0]
             .Split(Environment.NewLine)
             .Select(x => x.Split(",").ToArray())
-            .Select(x => new Dot()
+            .Select(x => new Dot
             {
                 X = int.Parse(x[0]),
                 Y = int.Parse(x[1])
