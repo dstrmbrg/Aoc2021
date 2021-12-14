@@ -20,7 +20,6 @@ namespace Aoc2021
             }
 
             var dotsString = string.Join(Environment.NewLine, dots.Select(d => $"{d.X},{d.Y}"));
-
             var output = dotsString + Environment.NewLine + Environment.NewLine + folds;
 
             File.WriteAllText("C:\\temp\\folds.txt", output);
@@ -56,9 +55,7 @@ namespace Aoc2021
         private static IList<Dot> ReadInput()
         {
             var input = File.ReadAllText(Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) + "\\fold_input.txt");
-
             var lines = input.Split(Environment.NewLine);
-
             var dots = new List<Dot>();
 
             for (var y = 0; y < lines.Length; y++)
