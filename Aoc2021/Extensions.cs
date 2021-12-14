@@ -64,4 +64,15 @@ internal static class Extensions
         return first.OrderBy(x => x).SequenceEqual(second.OrderBy(x => x));
     }
 
+    public static void AddOrIncrement<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, dynamic value)
+    {
+        if (!dict.ContainsKey(key))
+        {
+            dict.Add(key, value);
+            return;
+        }
+
+        dict[key] += value;
+    }
+
 }
