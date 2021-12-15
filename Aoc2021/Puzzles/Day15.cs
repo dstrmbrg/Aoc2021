@@ -4,17 +4,11 @@ using System.Linq;
 
 namespace Aoc2021.Puzzles;
 
-internal class Day15 : Puzzle
+internal class Day15 : DisabledPuzzle
 {
-    public override object PartOne()
-    {
-        return CalculateLowestRisk(false);
-    }
+    public override object PartOne() => CalculateLowestRisk(false);
 
-    public override object PartTwo()
-    {
-        return CalculateLowestRisk(true);
-    }
+    public override object PartTwo() => CalculateLowestRisk(true);
 
     private long CalculateLowestRisk(bool megaMap)
     {
@@ -24,9 +18,12 @@ internal class Day15 : Puzzle
 
         var width = goal.X + 1;
         var height = goal.Y + 1;
-
+        
         if (megaMap)
-            goal = new Location(goal.X + 4 * width, goal.Y + 4 * height, (goal.Risk + 8) % 10);
+        {
+            var newRisk = goal.Risk + 8 < 10 ? goal.Risk + 8 : (goal.Risk + 8) % 10 + 1;
+            goal = new Location(goal.X + 4 * width, goal.Y + 4 * height, newRisk);
+        }
 
         var queue = new Queue<(Location Location, long Risk)>();
         var visited = new Dictionary<Location, long>();
@@ -49,8 +46,8 @@ internal class Day15 : Puzzle
 
             var adjacentLocations = GetAdjacentLocations(map, location, megaMap, width, height)
                 .Where(a => !visited.TryGetValue(a, out var previousRisk) || risk + a.Risk < previousRisk)
-                .OrderBy(a => a.X)
-                .ThenBy(a => a.Y);
+                .OrderBy(a => goal.X - a.X + goal.Y - a.Y)
+                .ThenBy(a => a.Risk);
 
             foreach (var adjacentLocation in adjacentLocations)
             {
@@ -85,19 +82,23 @@ internal class Day15 : Puzzle
         if (dict.TryGetValue(key, out var location))
             return location;
         
-        var offset = key.X / width + key.Y / height;
+        var offset = (int)(Math.Floor((decimal)key.X / width) + Math.Floor((decimal)key.Y / height));
         var x = key.X % width;
         var y = key.Y % height;
-
+        
         var originalLocation = dict[(x, y)];
-        var newLocation = new Location(key.X, key.Y, (originalLocation.Risk + offset) % 10);
+        var newRisk = originalLocation.Risk + offset < 10 
+            ? originalLocation.Risk + offset : 
+            (originalLocation.Risk + offset) % 10 + 1;
+
+        var newLocation = new Location(key.X, key.Y, newRisk);
 
         return newLocation;
     }
     
     private IEnumerable<Location> GetLocations()
     {
-        var rows = Utilities.GetInput(GetType(), true)
+        var rows = Utilities.GetInput(GetType())
             .Split(Environment.NewLine);
         
         for (var y = 0; y < rows.Length; y++)
