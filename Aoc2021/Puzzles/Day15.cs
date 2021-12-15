@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace Aoc2021.Puzzles;
 
-internal class Day15 : DisabledPuzzle
+internal class Day15 : Puzzle
 {
     public override object PartOne() => CalculateLowestRisk(false);
 
     public override object PartTwo() => CalculateLowestRisk(true);
 
-    private long CalculateLowestRisk(bool megaMap)
+    private int CalculateLowestRisk(bool megaMap)
     {
         var locations = GetLocations().ToArray();
         var (start, goal) = (locations.First(), locations.Last());
@@ -25,11 +25,11 @@ internal class Day15 : DisabledPuzzle
             goal = new Location(goal.X + 4 * width, goal.Y + 4 * height, newRisk);
         }
 
-        var queue = new Queue<(Location Location, long Risk)>();
-        var visited = new Dictionary<Location, long>();
+        var queue = new PriorityQueue<(Location Location, int Risk), int>();
+        var visited = new Dictionary<Location, int>();
 
-        queue.Enqueue((start, -start.Risk));
-        var lowest = long.MaxValue;
+        queue.Enqueue((start, -start.Risk), 1);
+        var lowest = int.MaxValue;
 
         while (queue.Count != 0)
         {
@@ -58,7 +58,7 @@ internal class Day15 : DisabledPuzzle
                 else
                     visited.Add(adjacentLocation, nextRisk);
 
-                queue.Enqueue((adjacentLocation, risk));
+                queue.Enqueue((adjacentLocation, risk), risk);
             }
         }
         
