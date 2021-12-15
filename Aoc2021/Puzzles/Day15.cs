@@ -8,20 +8,26 @@ internal class Day15 : Puzzle
 {
     public override object PartOne()
     {
-        var locations = GetLocations().ToArray();
-        var (start, goal) = (locations.First(), locations.Last());
-        var map = locations.ToDictionary(l => (l.X, l.Y));
-
-        return CalculateLowestRisk(map, start, goal);
+        return CalculateLowestRisk(false);
     }
 
     public override object PartTwo()
     {
-        return "-1";
+        return CalculateLowestRisk(true);
     }
 
-    private static long CalculateLowestRisk(IDictionary<(int, int), Location> map, Location start, Location goal)
+    private long CalculateLowestRisk(bool megaMap)
     {
+        var locations = GetLocations().ToArray();
+        var (start, goal) = (locations.First(), locations.Last());
+        var map = locations.ToDictionary(l => (l.X, l.Y));
+
+        var width = goal.X + 1;
+        var height = goal.Y + 1;
+
+        if (megaMap)
+            goal = new Location(goal.X + 4 * width, goal.Y + 4 * height, (goal.Risk + 8) % 10);
+
         var queue = new Queue<(Location Location, long Risk)>();
         var visited = new Dictionary<Location, long>();
 
@@ -41,7 +47,7 @@ internal class Day15 : Puzzle
                     continue;
                 }
 
-            var adjacentLocations = GetAdjacentLocations(map, location)
+            var adjacentLocations = GetAdjacentLocations(map, location, megaMap, width, height)
                 .Where(a => !visited.TryGetValue(a, out var previousRisk) || risk + a.Risk < previousRisk)
                 .OrderBy(a => a.X)
                 .ThenBy(a => a.Y);
@@ -61,17 +67,37 @@ internal class Day15 : Puzzle
         
         return lowest;
     }
-    
-    private static IEnumerable<Location> GetAdjacentLocations(IDictionary<(int, int), Location> map, Location location)
-    {
-        return new (int X, int Y)[] { (location.X + 1, location.Y), (location.X, location.Y + 1), (location.X - 1, location.Y), (location.X, location.Y - 1) }
-            .Where(a => map.ContainsKey((a.X, a.Y)))
-            .Select(a => map[(a.X, a.Y)]);
-    }
 
+    private static IEnumerable<Location> GetAdjacentLocations(IDictionary<(int, int), Location> map, Location location, bool megaMap, int width, int height)
+    {
+        var multiplier = megaMap ? 5 : 1;
+
+        return new (int X, int Y)[] { (location.X + 1, location.Y), (location.X, location.Y + 1), (location.X - 1, location.Y), (location.X, location.Y - 1) }
+            .Where(a => a.X.IsBetween(0, width * multiplier - 1) && a.Y.IsBetween(0, height * multiplier - 1))
+            .Select(a => GetLocation(map, (a.X, a.Y), megaMap, width, height));
+    }
+    
+    private static Location GetLocation(IDictionary<(int X, int Y), Location> dict, (int X, int Y) key, bool megaMap, int width, int height)
+    {
+        if (!megaMap)
+            return dict[key];
+
+        if (dict.TryGetValue(key, out var location))
+            return location;
+        
+        var offset = key.X / width + key.Y / height;
+        var x = key.X % width;
+        var y = key.Y % height;
+
+        var originalLocation = dict[(x, y)];
+        var newLocation = new Location(key.X, key.Y, (originalLocation.Risk + offset) % 10);
+
+        return newLocation;
+    }
+    
     private IEnumerable<Location> GetLocations()
     {
-        var rows = Utilities.GetInput(GetType())
+        var rows = Utilities.GetInput(GetType(), true)
             .Split(Environment.NewLine);
         
         for (var y = 0; y < rows.Length; y++)
