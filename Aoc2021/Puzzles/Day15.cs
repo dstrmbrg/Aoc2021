@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Aoc2021.Puzzles;
 
-internal class Day15 : Puzzle
+internal class Day15 : DisabledPuzzle
 {
     public override object PartOne() => CalculateLowestRisk(false);
 
