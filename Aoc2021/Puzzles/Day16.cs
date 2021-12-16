@@ -29,15 +29,11 @@ internal class Day16 : Puzzle
         var packetVersion = Convert.ToInt32(bitString[..3], 2);
         var type = Convert.ToInt32(bitString.Substring(3, 3), 2);
         var packet = new Packet(packetVersion, type);
-        
+
         if (type == 4)
-        {
             packet.Value = ParseLiteralValue(bitString, out packetSize);
-        }
         else
-        {
             ParseOperatorPacket(bitString, packet, out packetSize);
-        }
 
         return packet;
     }
