@@ -131,12 +131,7 @@ internal class Day16 : Puzzle
             _current = 0;
         }
 
-        public int Next(int bits)
-        {
-            var value = Convert.ToInt32(_bitString.Substring(_current, bits), 2);
-            _current += bits;
-            return value;
-        }
+        public int Next(int bits) => Convert.ToInt32(_bitString[_current..(_current += bits)], 2);
     }
 
     private enum Operator
