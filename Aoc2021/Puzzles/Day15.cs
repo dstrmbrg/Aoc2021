@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Aoc2021.Puzzles;
 
-internal class Day15 : DisabledPuzzle
+internal class Day15 : Puzzle
 {
     public override object PartOne() => CalculateLowestRisk(false);
 
@@ -15,13 +15,12 @@ internal class Day15 : DisabledPuzzle
         var locations = GetLocations().ToArray();
         var (start, goal) = (locations.First(), locations.Last());
         var map = locations.ToDictionary(l => (l.X, l.Y));
-
         var width = goal.X + 1;
         var height = goal.Y + 1;
         
         if (megaMap)
         {
-            var newRisk = goal.Risk + 8 < 10 ? goal.Risk + 8 : (goal.Risk + 8) % 10 + 1;
+            var newRisk = goal.Risk + 8 < 10 ? goal.Risk + 8 : goal.Risk + 8 - 9;
             goal = new Location(goal.X + 4 * width, goal.Y + 4 * height, newRisk);
         }
 
@@ -29,40 +28,39 @@ internal class Day15 : DisabledPuzzle
         var visited = new Dictionary<Location, int>();
 
         queue.Enqueue((start, -start.Risk), 1);
-        var lowest = int.MaxValue;
 
         while (queue.Count != 0)
         {
             var (location, risk) = queue.Dequeue();
 
             risk += location.Risk;
-            
-            if (location == goal)
-                if (risk < lowest)
-                {
-                    lowest = risk;
-                    continue;
-                }
 
-            var adjacentLocations = GetAdjacentLocations(map, location, megaMap, width, height)
-                .Where(a => !visited.TryGetValue(a, out var previousRisk) || risk + a.Risk < previousRisk)
-                .OrderBy(a => goal.X - a.X + goal.Y - a.Y)
-                .ThenBy(a => a.Risk);
-
-            foreach (var adjacentLocation in adjacentLocations)
+            foreach (var adjacentLocation in GetAdjacentLocations(map, location, megaMap, width, height))
             {
                 var nextRisk = risk + adjacentLocation.Risk;
 
-                if (visited.ContainsKey(adjacentLocation))
-                    visited[adjacentLocation] = nextRisk;
-                else
-                    visited.Add(adjacentLocation, nextRisk);
+                if (adjacentLocation == goal)
+                    return nextRisk;
 
-                queue.Enqueue((adjacentLocation, risk), risk);
+                var containsKey = visited.TryGetValue(adjacentLocation, out var nodeRisk);
+
+                switch (containsKey)
+                {
+                    case true when nodeRisk <= nextRisk:
+                        continue;
+                    case true:
+                        visited[adjacentLocation] = nextRisk;
+                        break;
+                    default:
+                        visited.Add(adjacentLocation, nextRisk);
+                        break;
+                }
+
+                queue.Enqueue((adjacentLocation, risk), nextRisk);
             }
         }
-        
-        return lowest;
+
+        return 0;
     }
 
     private static IEnumerable<Location> GetAdjacentLocations(IDictionary<(int, int), Location> map, Location location, bool megaMap, int width, int height)
@@ -86,10 +84,8 @@ internal class Day15 : DisabledPuzzle
         var x = key.X % width;
         var y = key.Y % height;
         
-        var originalLocation = dict[(x, y)];
-        var newRisk = originalLocation.Risk + offset < 10 
-            ? originalLocation.Risk + offset : 
-            (originalLocation.Risk + offset) % 10 + 1;
+        var (_, _, risk) = dict[(x, y)];
+        var newRisk = risk + offset < 10 ? risk + offset : risk + offset - 9;
 
         var newLocation = new Location(key.X, key.Y, newRisk);
 
