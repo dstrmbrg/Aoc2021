@@ -47,7 +47,7 @@ internal class Day17 : Puzzle
     private static int CalculateMaxPosition(int v) => v * (v + 1) / 2;
     private static int CalculatePosition(int v, int t) => (t + 1) * (2 * v - t) / 2;
     private static int CalculateHorizontalPosition(int v, int t) => t >= v ? CalculateMaxPosition(v) : CalculatePosition(v, t);
-    private static int CalculateMinHorizontalVelocity(int m) => (int)Math.Ceiling((Math.Sqrt(8 * m + 1) - 1) / 2);
+    private static int CalculateMinHorizontalVelocity(int pos) => (int)Math.Ceiling((Math.Sqrt(8 * pos + 1) - 1) / 2);
 
     private Area GetTarget()
     {
