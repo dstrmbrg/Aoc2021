@@ -23,7 +23,7 @@ internal class Day17 : Puzzle
         var maxVerticalVelocity = 0;
         var minHorizontalVelocity = CalculateMinHorizontalVelocity(target.X1);
 
-        for (var vY = target.Y1; vY <= -2 * target.Y1; vY++) 
+        for (var vY = target.Y1; vY <= -target.Y1 + 1; vY++) 
         for (var vX = minHorizontalVelocity; vX <= target.X2; vX++)
         for (var t = 0; t < int.MaxValue; t++)
         {
