@@ -10,7 +10,8 @@ internal class Day16 : Puzzle
     public override object PartOne()
     {
         var packet = GetInput()
-            .Pipe(ConvertToBitString)
+            .Pipe(ToBitString)
+            .Pipe(ToBitStream)
             .Pipe(x => ParsePacket(x, out _));
 
         var allSubPackets = packet.SubPackets.Concat(packet.SubPackets.SelectManyRecursive(x => x.SubPackets)).ToList();
@@ -20,83 +21,77 @@ internal class Day16 : Puzzle
 
     public override object PartTwo() =>
         GetInput()
-            .Pipe(ConvertToBitString)
+            .Pipe(ToBitString)
+            .Pipe(ToBitStream)
             .Pipe(x => ParsePacket(x, out _))
             .GetValue();
 
-    private Packet ParsePacket(string bitString, out int packetSize)
+    private Packet ParsePacket(BitStream bitStream, out int packetSize)
     {
-        var packetVersion = Convert.ToInt32(bitString[..3], 2);
-        var type = Convert.ToInt32(bitString.Substring(3, 3), 2);
+        var packetVersion = bitStream.Next(3);
+        var type = bitStream.Next(3);
         var packet = new Packet(packetVersion, type);
 
         if (type == 4)
-            packet.Value = ParseLiteralValue(bitString, out packetSize);
+            packet.Value = ParseLiteralValue(bitStream, out packetSize);
         else
-            ParseOperatorPacket(bitString, packet, out packetSize);
+            ParseOperatorPacket(bitStream, packet, out packetSize);
 
         return packet;
     }
 
-    private static long ParseLiteralValue(string bitString, out int packetSize)
+    private static long ParseLiteralValue(BitStream bitStream, out int packetSize)
     {
-        var currentIndex = 6;
-        var resultBitString = string.Empty;
+        packetSize = 6;
+        var result = 0L;
 
-        while (bitString[currentIndex] == '1')
+        while (true)
         {
-            resultBitString += bitString.Substring(currentIndex + 1, 4);
-            currentIndex += 5;
+            packetSize += 5;
+            var value = bitStream.Next(5);
+            result = (result << 4) | (uint)(value & 0xF);
+            
+            if (value >> 4 == 0)
+                break;
         }
-
-        resultBitString += bitString.Substring(currentIndex + 1, 4);
-        packetSize = currentIndex + 5;
-
-        return Convert.ToInt64(resultBitString, 2);
+        
+        return result;
     }
 
-    private void ParseOperatorPacket(string bitString, Packet packet, out int packetSize)
+    private void ParseOperatorPacket(BitStream bitStream, Packet packet, out int packetSize)
     {
-        var lengthType = int.Parse(bitString[6].ToString());
-        var (remainingBits, remainingSubPackets, headerSize) = GetOperatorPacketInfo(bitString, lengthType);
+        var lengthType = bitStream.Next(1);
+        var (remainingBits, remainingSubPackets, headerSize) = GetOperatorPacketInfo(bitStream, lengthType);
         packetSize = headerSize;
-        bitString = string.Join("", bitString.Skip(headerSize));
 
         while (remainingBits is > 0 || remainingSubPackets is > 0)
         {
-            var subPacket = ParsePacket(bitString, out var subPacketSize);
-
+            var subPacket = ParsePacket(bitStream, out var subPacketSize);
             packet.SubPackets.Add(subPacket);
             packetSize += subPacketSize;
-            bitString = string.Join("", bitString.Skip(subPacketSize));
 
             if (remainingSubPackets.HasValue) remainingSubPackets--;
             if (remainingBits.HasValue) remainingBits -= subPacketSize;
         }
     }
 
-    private static (int? numberOfBits, int? numberOfSubPackets, int headerSize) GetOperatorPacketInfo(string bitString, int lengthType)
+    private static (int? numberOfBits, int? numberOfSubPackets, int headerSize) GetOperatorPacketInfo(BitStream bitStream, int lengthType)
     {
-        if (lengthType == 0)
-            return (Convert.ToInt32(bitString.Substring(7, 15), 2), null, 22);
-
-        return (null, Convert.ToInt32(bitString.Substring(7, 11), 2), 18);
+        return lengthType == 0 ? (bitStream.Next(15), null, 22) : (null, bitStream.Next(11), 18);
     }
 
-    private static string ConvertToBitString(string hexString)
+    private static string ToBitString(string hexString)
     {
         return hexString.Aggregate(string.Empty,
             (current, c) => current + Convert.ToString(Convert.ToInt32(c.ToString(), 16), 2).PadLeft(4, '0'));
     }
 
-    private string GetInput()
-    {
-        return Utilities.GetInput(GetType());
-    }
+    private static BitStream ToBitStream(string bitString) => new(bitString);
+    private string GetInput() => Utilities.GetInput(GetType());
 
     private class Packet
     {
-        private readonly int _type;
+        private readonly Operator _type;
         public readonly int Version;
         public long Value;
         public readonly IList<Packet> SubPackets;
@@ -104,7 +99,7 @@ internal class Day16 : Puzzle
         public Packet(int version, int type)
         {
             Version = version;
-            _type = type;
+            _type = (Operator)type;
             SubPackets = new List<Packet>();
         }
 
@@ -112,16 +107,47 @@ internal class Day16 : Puzzle
         {
             return _type switch
             {
-                4 => Value,
-                0 => SubPackets.Sum(x => x.GetValue()),
-                1 => SubPackets.Aggregate(1L, (current, sp) => current * sp.GetValue()),
-                2 => SubPackets.Min(x => x.GetValue()),
-                3 => SubPackets.Max(x => x.GetValue()),
-                5 => SubPackets[0].GetValue() > SubPackets[1].GetValue() ? 1 : 0,
-                6 => SubPackets[0].GetValue() < SubPackets[1].GetValue() ? 1 : 0,
-                7 => SubPackets[0].GetValue() == SubPackets[1].GetValue() ? 1 : 0,
+                Operator.LiteralValue => Value,
+                Operator.Sum => SubPackets.Sum(x => x.GetValue()),
+                Operator.Product => SubPackets.Aggregate(1L, (current, sp) => current * sp.GetValue()),
+                Operator.Min => SubPackets.Min(x => x.GetValue()),
+                Operator.Max => SubPackets.Max(x => x.GetValue()),
+                Operator.GreaterThan => SubPackets[0].GetValue() > SubPackets[1].GetValue() ? 1 : 0,
+                Operator.LessThan => SubPackets[0].GetValue() < SubPackets[1].GetValue() ? 1 : 0,
+                Operator.Equal => SubPackets[0].GetValue() == SubPackets[1].GetValue() ? 1 : 0,
                 _ => 0
             };
         }
+    }
+
+    private class BitStream
+    {
+        private int _current;
+        private readonly string _bitString;
+
+        public BitStream(string bitString)
+        {
+            _bitString = bitString;
+            _current = 0;
+        }
+
+        public int Next(int bits)
+        {
+            var value = Convert.ToInt32(_bitString.Substring(_current, bits), 2);
+            _current += bits;
+            return value;
+        }
+    }
+
+    private enum Operator
+    {
+        Sum,
+        Product,
+        Min,
+        Max,
+        LiteralValue,
+        GreaterThan,
+        LessThan,
+        Equal
     }
 }
