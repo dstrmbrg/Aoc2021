@@ -128,7 +128,6 @@ internal class Day16 : Puzzle
         public BitStream(string bitString)
         {
             _bitString = bitString;
-            _current = 0;
         }
 
         public int Next(int bits) => Convert.ToInt32(_bitString[_current..(_current += bits)], 2);
