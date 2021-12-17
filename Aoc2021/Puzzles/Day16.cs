@@ -28,14 +28,12 @@ internal class Day16 : Puzzle
 
     private Packet ParsePacket(BitStream bitStream, out int packetSize)
     {
-        var packetVersion = bitStream.Next(3);
-        var type = bitStream.Next(3);
-        var packet = new Packet(packetVersion, type);
+        var packet = new Packet(bitStream.Next(3), bitStream.Next(3));
 
-        if (type == 4)
+        if (packet.Type == Operator.LiteralValue)
             packet.Value = ParseLiteralValue(bitStream, out packetSize);
         else
-            ParseOperatorPacket(bitStream, packet, out packetSize);
+            ParseSubPackets(bitStream, packet, out packetSize);
 
         return packet;
     }
@@ -58,7 +56,7 @@ internal class Day16 : Puzzle
         return result;
     }
 
-    private void ParseOperatorPacket(BitStream bitStream, Packet packet, out int packetSize)
+    private void ParseSubPackets(BitStream bitStream, Packet packet, out int packetSize)
     {
         var lengthType = bitStream.Next(1);
         var (remainingBits, remainingSubPackets, headerSize) = GetOperatorPacketInfo(bitStream, lengthType);
@@ -91,7 +89,7 @@ internal class Day16 : Puzzle
 
     private class Packet
     {
-        private readonly Operator _type;
+        public readonly Operator Type;
         public readonly int Version;
         public long Value;
         public readonly IList<Packet> SubPackets;
@@ -99,13 +97,13 @@ internal class Day16 : Puzzle
         public Packet(int version, int type)
         {
             Version = version;
-            _type = (Operator)type;
+            Type = (Operator)type;
             SubPackets = new List<Packet>();
         }
 
         public long GetValue()
         {
-            return _type switch
+            return Type switch
             {
                 Operator.LiteralValue => Value,
                 Operator.Sum => SubPackets.Sum(x => x.GetValue()),
