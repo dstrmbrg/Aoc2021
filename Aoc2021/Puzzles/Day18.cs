@@ -9,7 +9,7 @@ internal class Day18 : DisabledPuzzle
 {
     public override object PartOne() => GetPairs()
         .Pipe(Simulate)
-        .Pipe(x => x.GetMagnitude());
+        .Pipe(x => x.CalculateMagnitude());
 
     public override object PartTwo()
     {
@@ -32,7 +32,7 @@ internal class Day18 : DisabledPuzzle
                 };
 
                 var result = Simulate(array);
-                var magnitude = result.GetMagnitude();
+                var magnitude = result.CalculateMagnitude();
 
                 if (magnitude > max)
                     max = magnitude;
@@ -85,7 +85,6 @@ internal class Day18 : DisabledPuzzle
         {
             explodingPair.ExplodeLeft();
             explodingPair.ExplodeRight();
-
             explodingPair.Left = null;
             explodingPair.Right = null;
             explodingPair.Value = 0;
@@ -101,14 +100,10 @@ internal class Day18 : DisabledPuzzle
             .FirstOrDefault(p => p.Value >= 10);
 
         if (splittingPair == null) return false;
-
-        var value = splittingPair.Value;
-        var leftValue = value / 2;
-        var rightValue = (value + 1) / 2;
         
+        splittingPair.Left = new Pair(splittingPair) { Value = splittingPair.Value / 2 };
+        splittingPair.Right = new Pair(splittingPair) { Value = (splittingPair.Value + 1) / 2 };
         splittingPair.Value = null;
-        splittingPair.Left = new Pair(splittingPair) { Value = leftValue };
-        splittingPair.Right = new Pair(splittingPair) { Value = rightValue };
 
         return true;
     }
@@ -189,12 +184,9 @@ internal class Day18 : DisabledPuzzle
             if (Value.HasValue)
                 return new List<Pair> { this };
 
-            var result = new List<Pair>() { this };
-
-            var leftChildren = Left.GetAllChildren();
-            var rightChildren = Right.GetAllChildren();
-            result.AddRange(leftChildren);
-            result.AddRange(rightChildren);
+            var result = new List<Pair> { this };
+            result.AddRange(Left.GetAllChildren());
+            result.AddRange(Right.GetAllChildren());
 
             return result;
         }
@@ -209,8 +201,7 @@ internal class Day18 : DisabledPuzzle
                 .Where((x, i) => i < currentIndex && x.Value.HasValue && x.Parent != this)
                 .LastOrDefault();
 
-            if (firstLeft == null)
-                return;
+            if (firstLeft == null) return;
 
             firstLeft.Value += Left.Value;
         }
@@ -225,23 +216,19 @@ internal class Day18 : DisabledPuzzle
                 .Where((x, i) => i > currentIndex && x.Value.HasValue && x.Parent != this)
                 .FirstOrDefault();
 
-            if (firstRight == null)
-                return;
+            if (firstRight == null) return;
 
             firstRight.Value += Right.Value;
         }
 
-        public int GetMagnitude()
+        public int CalculateMagnitude()
         {
             if (Left == null || Right == null)
                 return Value ?? 0;
 
-            return Left.GetMagnitude() * 3 + Right.GetMagnitude() * 2;
+            return Left.CalculateMagnitude() * 3 + Right.CalculateMagnitude() * 2;
         }
 
-        private Pair GetRoot()
-        {
-            return Parent == null ? this : Parent.GetRoot();
-        }
+        private Pair GetRoot() => Parent == null ? this : Parent.GetRoot();
     }
 }
