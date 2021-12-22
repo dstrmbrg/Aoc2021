@@ -125,7 +125,6 @@ internal class Day22 : Puzzle
 
         var x1 = Math.Max(oldCuboid.X1, newCuboid.X1);
         var x2 = Math.Min(oldCuboid.X2, newCuboid.X2);
-
         var y1 = Math.Max(oldCuboid.Y1, newCuboid.Y1);
         var y2 = Math.Min(oldCuboid.Y2, newCuboid.Y2);
 
@@ -142,7 +141,6 @@ internal class Day22 : Puzzle
 
         var x1 = Math.Max(oldCuboid.X1, newCuboid.X1);
         var x2 = Math.Min(oldCuboid.X2, newCuboid.X2);
-
         var y1 = Math.Max(oldCuboid.Y1, newCuboid.Y1);
         var y2 = Math.Min(oldCuboid.Y2, newCuboid.Y2);
 
